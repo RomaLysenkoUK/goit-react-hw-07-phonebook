@@ -1,19 +1,30 @@
-import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePhoneContact } from 'redux/contactSlice';
-import { selectPhoneContacts, selectedFilter } from 'redux/contactsSelector';
+import {deleteContact} from 'redux/contactsOperations';
+import { selectIsLoading, selectError,selectRenderContacts  } from 'redux/contactsSelector';
 
+import { RotatingLines } from  'react-loader-spinner'
 import s from './PhoneList.module.css';
 
-export const PhoneList = () => {
-  const phoneContacts = useSelector(selectPhoneContacts);
-  const filter = useSelector(selectedFilter);
-  const dispatch = useDispatch();
-  const renderContacts = phoneContacts.filter(({ name }) =>
-    name.toLowerCase().includes(filter.toLowerCase())
-  );
+export const ContactList = () => {
+   const dispatch = useDispatch();
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+  const renderContacts= useSelector(selectRenderContacts);
+  
   return (
     <>
+    {isLoading && <div className={s.loader}><RotatingLines
+  strokeColor="grey"
+  strokeWidth="5"
+  animationDuration="0.75"
+  width="96"
+  visible={true}
+/></div> }
+      {error && (
+        <p>
+          Sorry!The action was not completed, try again later.
+        </p>
+      )}
       <ul className={s.phoneList}>
         {!renderContacts.length && <p>There are no contacts found!</p>}
         {renderContacts.length > 0 &&
@@ -25,7 +36,7 @@ export const PhoneList = () => {
                 <button
                   className={s.btnDelete}
                   type="button"
-                  onClick={() => dispatch(deletePhoneContact(id))}
+                  onClick={() => dispatch(deleteContact(id))}
                 >
                   Delete
                 </button>
@@ -36,7 +47,4 @@ export const PhoneList = () => {
     </>
   );
 };
-PhoneList.propTypes = {
-  phoneContacts: PropTypes.array,
-  onDelete: PropTypes.func,
-};
+

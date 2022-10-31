@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { nanoid } from 'nanoid';
 import s from './Form.module.css';
-import PropTypes from 'prop-types';
-import { useDispatch } from 'react-redux';
-import { addPhoneContact } from 'redux/contactSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/contactsOperations';
+import { selectContacts } from '../../redux/contactsSelector';
 
 export const Form = () => {
   const [name, setName] = useState('');
@@ -27,6 +27,7 @@ export const Form = () => {
         return;
     }
   };
+  const oldContacts = useSelector(selectContacts);
 
   const handleSubmit = event => {
     event.preventDefault();
@@ -36,7 +37,17 @@ export const Form = () => {
       number,
     };
 
-    dispatch(addPhoneContact(newContactData));
+    if (
+      oldContacts.some(
+        contact =>
+          contact.name.toLowerCase() === newContactData.name.toLowerCase()
+      )
+    ) {
+      alert(`contact with ${newContactData.name} has already been created`);
+      return;
+    }
+
+    dispatch(addContact(newContactData));
     setName('');
     setNumber('');
   };
@@ -65,7 +76,7 @@ export const Form = () => {
         value={number}
         onChange={handleChange}
         pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-        title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+        title="  number must be digits and can contain spaces, dashes, parentheses and can start with +"
         id={nanoid()}
         required
       />
@@ -74,8 +85,3 @@ export const Form = () => {
     </form>
   );
 };
-
-Form.propTypes = {
-  addPhoneContact: PropTypes.func,
-};
-
